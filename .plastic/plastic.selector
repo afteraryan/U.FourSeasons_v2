@@ -1,0 +1,4 @@
+repository "U.FourSeasons_v2@afteraryan@cloud"
+  path "/"
+    smartbranch "/main"           
+     
