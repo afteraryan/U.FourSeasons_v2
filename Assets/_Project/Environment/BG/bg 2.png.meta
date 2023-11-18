@@ -1,5 +1,5 @@
 fileFormatVersion: 2
-guid: 74d8ab01b33432a409e011b61cf49b79
+guid: 42b82f4404bba23429d7e2de056a0f97
 TextureImporter:
   internalIDToNameTable: []
   externalObjects: {}
@@ -43,7 +43,7 @@ TextureImporter:
   nPOTScale: 0
   lightmap: 0
   compressionQuality: 50
-  spriteMode: 2
+  spriteMode: 1
   spriteExtrude: 1
   spriteMeshType: 1
   alignment: 0
@@ -134,70 +134,7 @@ TextureImporter:
     forceMaximumCompressionQuality_BC6H_BC7: 0
   spriteSheet:
     serializedVersion: 2
-    sprites:
-    - serializedVersion: 2
-      name: Cloud 5_0
-      rect:
-        serializedVersion: 2
-        x: 18
-        y: 367
-        width: 143
-        height: 58
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 8d9d4fa500d0b2246af4b2d6d520a687
-      internalID: -1059924101
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Cloud 5_1
-      rect:
-        serializedVersion: 2
-        x: 253
-        y: 0
-        width: 223
-        height: 124
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: d5dc8e79a39fa9446a866a791fe8da6a
-      internalID: 400323452
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
-    - serializedVersion: 2
-      name: Cloud 5_2
-      rect:
-        serializedVersion: 2
-        x: 262
-        y: 239
-        width: 216
-        height: 138
-      alignment: 0
-      pivot: {x: 0, y: 0}
-      border: {x: 0, y: 0, z: 0, w: 0}
-      outline: []
-      physicsShape: []
-      tessellationDetail: 0
-      bones: []
-      spriteID: 844bae5aff4fdae4587a8ead7d27258d
-      internalID: 2052270657
-      vertices: []
-      indices: 
-      edges: []
-      weights: []
+    sprites: []
     outline: []
     physicsShape: []
     bones: []
@@ -208,10 +145,7 @@ TextureImporter:
     edges: []
     weights: []
     secondaryTextures: []
-    nameFileIdTable:
-      Cloud 5_0: 1486934142
-      Cloud 5_1: -1059924101
-      Cloud 5_2: 400323452
+    nameFileIdTable: {}
   mipmapLimitGroupName: 
   pSDRemoveMatte: 0
   userData: 

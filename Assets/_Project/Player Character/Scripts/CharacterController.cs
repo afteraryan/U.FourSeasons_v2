@@ -41,8 +41,8 @@ namespace _Project.Player_Character.Script
         private bool _isGrounded;
         private bool _isJumping;
         private float _startJumpHeight;
-        private bool _isFalling;
-        private bool _fallStart;
+        private bool _isFalling = false;
+        private bool _fallStart = false;
         private float _extraHeight;
         
         //INPUT
