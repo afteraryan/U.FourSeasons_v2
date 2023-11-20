@@ -133,6 +133,6 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 1e9d732e483891a469d56daad03b481c, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  boostHeight: 0.5
+  boostHeight: 1
   extraBoostVelocity: 0.2
-  boostDuration: 0.7
+  boostDuration: 0.8

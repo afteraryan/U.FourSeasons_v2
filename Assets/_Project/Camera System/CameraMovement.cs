@@ -47,6 +47,7 @@ public class CameraMovement : MonoBehaviour
     private void FollowTarget()
     {
         transform.position = new Vector3(_initialPosition.x, target.position.y, _initialPosition.z);
+        //transform.position = new Vector3(target.position.x, target.position.y, _initialPosition.z);
     }
 
     private void ShakeCamera()

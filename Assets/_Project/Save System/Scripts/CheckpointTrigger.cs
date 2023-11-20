@@ -13,6 +13,6 @@ public class CheckpointTrigger : MonoBehaviour
     private void OnTriggerEnter2D(Collider2D other)
     {
         checkpointManager.SaveCheckpoint(checkpointIndex);
-        Debug.Log("Checkpoint saved!");
+        Debug.Log("Checkpoint saved!: " + checkpointIndex);
     }
 }

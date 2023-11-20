@@ -10,7 +10,7 @@ public class CheckpointManager : MonoBehaviour
 
     [SerializeField] private Transform[] checkpoints; // Array of checkpoint transforms
 
-    private void Awake()
+    private void Start()
     {
         LoadCheckpoint();
     }

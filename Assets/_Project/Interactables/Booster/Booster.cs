@@ -12,9 +12,12 @@ public class Booster : MonoBehaviour
         Debug.Log("Collision with: " + other.name + ", " + other.gameObject.layer);
         if (other.CompareTag("Player"))
         {
+            CharacterController characterController = other.GetComponentInParent<CharacterController>();
+            if (characterController.GetIsFalling())
+                return;
             Debug.Log("Collide");
-            other.GetComponentInParent<CharacterController>().Boost(extraBoostVelocity, boostHeight, boostDuration);
-            Destroy(gameObject);
+            characterController.Boost(extraBoostVelocity, boostHeight, boostDuration);
+            //Destroy(gameObject);
         }
     }
 }

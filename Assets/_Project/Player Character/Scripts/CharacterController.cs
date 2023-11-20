@@ -10,23 +10,34 @@ namespace _Project.Player_Character.Script
 {
     public class CharacterController : MonoBehaviour
     {
-        [SerializeField] private float jumpVelocity;
-        [SerializeField] private float horizontalSpeed;
-        [SerializeField] private float gravity;
-        private float _currentGravity;
-        [SerializeField] private float maxJumpHeight;
-        private float _verticalSpeed;
         
         [Header("PHYSICS PARAMETERS")]
-        [SerializeField] private float jumpImpulseMultiplier = 1f;
-        [SerializeField] private float jumpImpulseDuration = 0f;
-        [SerializeField] private float fallImpulseMultiplier = 1f;
-        [SerializeField] private float fallImpulseDuration = 0f;
+        [SerializeField] private CharacterPhysicsParameters initialPhysicsParameters;
+        [SerializeField] private CharacterPhysicsParameters normalPhysicsParameters;
+
+        #region PHYSICS PARAMETERS
+        private float gravity;
+        private float jumpVelocity;
+        private float horizontalSpeed;
+        private float maxJumpHeight;
+        private float jumpImpulseMultiplier = 1f;
+        private float jumpImpulseDuration = 0f;
+        private float fallImpulseMultiplier = 1f;
+        private float fallImpulseDuration = 0f;
+        private float fallForce;
+        private CharacterPhysicsParameters _currentPhysicsParameters;
+        #endregion
+        
+        private float _currentGravity;
+        private float _verticalSpeed;
         private float _verticalImpulseMultiplier = 1f;
         private float _horizontalImpulseMultiplier = 1f;
         private float _boostExtraVelocity;
         private float _flowerBoostImpulse = 1f;
         private float _flowerBoostHeightMultiplier = 1f;
+        private float _currentFallForce = 1;
+        private float _jumpHeight;
+        
         
         [Header("Ground Check Parameters")]
         [SerializeField] private Transform groundCheckPointCenter;
@@ -59,8 +70,12 @@ namespace _Project.Player_Character.Script
         private AnimationController _animationController;
         private Vector3 _originalScale;
         
+        public static event Action PlayerDied;
+
+        #region EVENT FUNCTIONS
         private void Awake()
         {
+            SetPhysicsParameters(initialPhysicsParameters);
             _playerInput = new InputSystem();
             _currentGravity = gravity;
             _originalScale = transform.localScale;
@@ -68,28 +83,24 @@ namespace _Project.Player_Character.Script
             _animationController = new AnimationController();
             _animationController.Init(GetComponentInChildren<Animator>());
         }
-
         private void Start()
         {
             _animationController.UpdateMovementState(CharacterMovementState.IDLE);
         }
-
         private void OnEnable()
         {
             _playerInput.Enable();
             _playerInput.PlayerCharacter2D.Movement.performed += MovementPerformed;
             _playerInput.PlayerCharacter2D.Movement.canceled += MovementCanceled;
-            _playerInput.PlayerCharacter2D.Jump.performed += ctx => Jump();
+            _playerInput.PlayerCharacter2D.Jump.performed += OnJumpPerformed;
         }
-
         private void OnDisable()
         {
             _playerInput.Disable();
             _playerInput.PlayerCharacter2D.Movement.performed -= MovementPerformed;
             _playerInput.PlayerCharacter2D.Movement.canceled -= MovementCanceled;
-            _playerInput.PlayerCharacter2D.Jump.performed -= ctx => Jump();
+            _playerInput.PlayerCharacter2D.Jump.performed -= OnJumpPerformed;
         }
-
         private void Update()
         {
             GroundCheck();
@@ -109,7 +120,10 @@ namespace _Project.Player_Character.Script
                 {
                     _isFalling = false;
                     _fallStart = false;
+                    _extraHeight = 0;
                     OnLand?.Invoke();
+                    //_currentGravity = 0;
+                    _currentFallForce = 1;
                     _animationController.UpdateMovementState(CharacterMovementState.JUMP_LAND);
                 }
             }
@@ -125,18 +139,18 @@ namespace _Project.Player_Character.Script
                     _fallStart = true;
                     _extraHeight = 0;
                     _currentGravity = 3 * gravity;
+                    _currentFallForce = fallForce;
                     OnFall?.Invoke();
                     _animationController.UpdateMovementState(CharacterMovementState.JUMP_FALL);
                 }
             }
         }
-
-
         private void FixedUpdate()
         {
             Move();
             HandleFall();
         }
+        #endregion
 
         private void GroundCheck()
         {
@@ -152,6 +166,25 @@ namespace _Project.Player_Character.Script
             Debug.DrawRay(centerPoint, Vector2.down * raycastLength, _isGrounded ? Color.green : Color.red);
             Debug.DrawRay(leftPoint, Vector2.down * raycastLength, _isGrounded ? Color.green : Color.red);
             Debug.DrawRay(rightPoint, Vector2.down * raycastLength, _isGrounded ? Color.green : Color.red);
+        }
+
+        public void Die()
+        {
+            Debug.Log("Player died");
+
+            // Make character fall
+            StartCoroutine(FallAndDieRoutine());
+        }
+        private IEnumerator FallAndDieRoutine()
+        {
+            // Adjust gravity to make the character fall
+            _currentGravity = -gravity; // Assuming negative gravity will make the character fall
+
+            // Wait for 2 seconds
+            yield return new WaitForSeconds(0.5f);
+
+            // Trigger the PlayerDied event
+            PlayerDied?.Invoke();
         }
 
         #region INPUT
@@ -171,6 +204,11 @@ namespace _Project.Player_Character.Script
         public void SetHorizontalInput(float horizontalInput)
         {
             _horizontalInput = horizontalInput;
+        }
+        
+        private void OnJumpPerformed(InputAction.CallbackContext context)
+        {
+            Jump();
         }
 
         #endregion
@@ -195,10 +233,12 @@ namespace _Project.Player_Character.Script
             // VERTICAL MOVEMENT
             // Apply vertical speed (jumping or falling)
             float verticalVelocity =
-                _verticalSpeed * Time.fixedDeltaTime * _verticalImpulseMultiplier*_flowerBoostImpulse + _boostExtraVelocity;
+                _verticalSpeed * Time.fixedDeltaTime * _verticalImpulseMultiplier*_flowerBoostImpulse*fallForce*_currentFallForce + _boostExtraVelocity;
             transform.position += new Vector3(0f, verticalVelocity, 0f);
 
-            if (transform.position.y >= 0.8f * (_startJumpHeight + maxJumpHeight*_flowerBoostHeightMultiplier) + _extraHeight)
+            _jumpHeight = 0.8f * (_startJumpHeight + maxJumpHeight * _flowerBoostHeightMultiplier) + _extraHeight;
+
+            if (transform.position.y >= _jumpHeight)
             {
                 _currentGravity = 4 * gravity;
             }
@@ -217,11 +257,15 @@ namespace _Project.Player_Character.Script
                 return;
         }
 
+        
+        Coroutine _boostCoroutine;
         public void Boost(float boostExtraVelocity, float extraHeight, float boostDuration)
         {
+            if(_boostCoroutine != null)
+                StopCoroutine(_boostCoroutine);
             _boostExtraVelocity += boostExtraVelocity;
             _extraHeight += extraHeight;
-            StartCoroutine(BoostRoutine(boostDuration, boostExtraVelocity));
+            _boostCoroutine = StartCoroutine(BoostRoutine(boostDuration, boostExtraVelocity));
         }
 
         public void FlowerBoost(float boostImpulse, float heightMultiplier, float boostDuration, GameObject flower)
@@ -307,5 +351,52 @@ namespace _Project.Player_Character.Script
             // When horizontalInput is 0, you can choose to keep the character's current direction or reset it.
         }
         #endregion
+
+        #region Wearables
+
+        public void WearJumpyShoes()
+        {
+            SetPhysicsParameters(normalPhysicsParameters);
+        }
+
+        #endregion
+
+        #region UTILITIES
+
+        public bool GetIsFalling()
+        {
+            return _isFalling;
+        }
+        
+        private void SetPhysicsParameters(CharacterPhysicsParameters physicsParameters)
+        {
+            gravity = physicsParameters.gravity;
+            jumpVelocity = physicsParameters.jumpVelocity;
+            horizontalSpeed = physicsParameters.horizontalSpeed;
+            maxJumpHeight = physicsParameters.maxJumpHeight;
+            jumpImpulseMultiplier = physicsParameters.jumpImpulseMultiplier;
+            jumpImpulseDuration = physicsParameters.jumpImpulseDuration;
+            fallImpulseMultiplier = physicsParameters.fallImpulseMultiplier;
+            fallImpulseDuration = physicsParameters.fallImpulseDuration;
+            fallForce = physicsParameters.fallForce;
+            _currentPhysicsParameters = physicsParameters;
+        }
+
+        #endregion
     }
 }
+
+[Serializable]
+public struct CharacterPhysicsParameters
+{
+    public float gravity;
+    public float jumpVelocity;
+    public float horizontalSpeed;
+    public float maxJumpHeight;
+    public float jumpImpulseMultiplier;
+    public float jumpImpulseDuration;
+    public float fallImpulseMultiplier;
+    public float fallImpulseDuration;
+    public float fallForce;
+}
+
