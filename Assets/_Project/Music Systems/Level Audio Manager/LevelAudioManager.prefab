@@ -44,8 +44,8 @@ AudioSource:
   serializedVersion: 4
   OutputAudioMixerGroup: {fileID: 0}
   m_audioClip: {fileID: 0}
-  m_PlayOnAwake: 1
-  m_Volume: 1
+  m_PlayOnAwake: 0
+  m_Volume: 0.7
   m_Pitch: 1
   Loop: 0
   Mute: 0
@@ -141,4 +141,5 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fdaa0e05ed79cfb40855b4d6f017e873, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  fadeDuration: 2
   backgroundMusicSource: {fileID: 7298408432473836450}

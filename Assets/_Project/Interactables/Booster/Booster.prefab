@@ -12,7 +12,7 @@ GameObject:
   - component: {fileID: 4220032956140721326}
   - component: {fileID: 3442258168103798862}
   - component: {fileID: 1365474611440066791}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: Booster
   m_TagString: Untagged
   m_Icon: {fileID: 0}
@@ -135,4 +135,4 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   boostHeight: 1
   extraBoostVelocity: 0.2
-  boostDuration: 0.8
+  boostDuration: 0.7

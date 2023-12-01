@@ -10,6 +10,7 @@ public class AnimationController
     private static readonly int TriggerJumpLaunch = Animator.StringToHash("trigger_Jump_Launch");
     private static readonly int TriggerJumpFall = Animator.StringToHash("trigger_Jump_Fall");
     private static readonly int TriggerJumpLand = Animator.StringToHash("trigger_Jump_Land");
+    private static readonly int TriggerDeath = Animator.StringToHash("trigger_Death");
 
     public void Init(Animator animator)
     {
@@ -64,5 +65,10 @@ public class AnimationController
             default:
                 break;
         }
+    }
+
+    public void PlayDeathAnimation()
+    {
+        _animator.SetTrigger(TriggerDeath);
     }
 }

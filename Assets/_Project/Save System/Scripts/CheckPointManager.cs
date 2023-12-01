@@ -6,42 +6,47 @@ using CharacterController = _Project.Player_Character.Script.CharacterController
 public class CheckpointManager : MonoBehaviour
 {
     private const string LastCheckpointKey = "LastCheckpoint";
-    private const string BackupCheckpointKey = "BackupCheckpoint";
 
-    [SerializeField] private Transform[] checkpoints; // Array of checkpoint transforms
+    [SerializeField] private CheckpointTrigger[] checkpoints; // Array of checkpoint transforms
 
     private void Start()
     {
         LoadCheckpoint();
+        ToggleCheckpoints();
     }
 
     public void SaveCheckpoint(int checkpointIndex)
     {
-        // Save the current checkpoint index and a backup
-        PlayerPrefs.SetInt(BackupCheckpointKey, PlayerPrefs.GetInt(LastCheckpointKey, 0));
-        PlayerPrefs.SetInt(LastCheckpointKey, checkpointIndex);
-        PlayerPrefs.Save();
+        SaveManager.SaveCheckpoint(checkpointIndex);
     }
 
-    public int LoadCheckpoint()
+    private int LoadCheckpoint()
     {
-        // Load the last checkpoint, or use backup if corrupted/invalid
-        int lastCheckpoint = PlayerPrefs.GetInt(LastCheckpointKey, -1);
-        if (lastCheckpoint < 0 || lastCheckpoint >= checkpoints.Length)
+        // Load the last checkpoint, defaulting to 0 if no data is found
+        int lastCheckpoint = SaveManager.LoadCheckpoint();
+
+        // Ensure the index is within bounds
+        if (lastCheckpoint >= checkpoints.Length)
         {
-            // Load backup if the last checkpoint is invalid
-            lastCheckpoint = PlayerPrefs.GetInt(BackupCheckpointKey, 0);
+            lastCheckpoint = 0; // Reset to first checkpoint if out of bounds
         }
-        SetPlayerPosition(checkpoints[lastCheckpoint].position);
+        SetPlayerPosition(checkpoints[lastCheckpoint].transform.position);
         return lastCheckpoint;
     }
 
-    public void ResetCheckpoints()
+    public void ToggleCheckpoints()
     {
-        // Clear both primary and backup checkpoint data
-        PlayerPrefs.DeleteKey(LastCheckpointKey);
-        PlayerPrefs.DeleteKey(BackupCheckpointKey);
+        int lastCheckpoint = LoadCheckpoint();
+        foreach (CheckpointTrigger checkpoint in checkpoints)
+        {
+            if(checkpoint == checkpoints[lastCheckpoint])
+                checkpoint.TurnOn();
+            else
+                checkpoint.TurnOff();
+        }
     }
+    
+    
     
     private void SetPlayerPosition(Vector3 position)
     {

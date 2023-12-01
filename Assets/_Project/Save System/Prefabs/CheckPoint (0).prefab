@@ -9,7 +9,6 @@ GameObject:
   serializedVersion: 6
   m_Component:
   - component: {fileID: 1687865556488441866}
-  - component: {fileID: 1835336555618493434}
   - component: {fileID: 3150262524984926482}
   - component: {fileID: 1445285368280598737}
   m_Layer: 7
@@ -35,19 +34,6 @@ Transform:
   - {fileID: 346206576684150066}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
---- !u!114 &1835336555618493434
-MonoBehaviour:
-  m_ObjectHideFlags: 0
-  m_CorrespondingSourceObject: {fileID: 0}
-  m_PrefabInstance: {fileID: 0}
-  m_PrefabAsset: {fileID: 0}
-  m_GameObject: {fileID: 3483189182100631998}
-  m_Enabled: 1
-  m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 4daff7db97c9fc54ba392c59fe1ce4b2, type: 3}
-  m_Name: 
-  m_EditorClassIdentifier: 
-  checkpointIndex: 0
 --- !u!60 &3150262524984926482
 PolygonCollider2D:
   m_ObjectHideFlags: 0
@@ -80,7 +66,7 @@ PolygonCollider2D:
   m_IsTrigger: 1
   m_UsedByEffector: 0
   m_UsedByComposite: 0
-  m_Offset: {x: 0, y: 0.12}
+  m_Offset: {x: 0, y: 0}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -92,17 +78,17 @@ PolygonCollider2D:
   m_AutoTiling: 0
   m_Points:
     m_Paths:
-    - - {x: -0.1755966, y: 0.05883813}
-      - {x: -0.27747178, y: -0.059325755}
+    - - {x: -0.172292, y: 0.02579248}
+      - {x: -0.2543398, y: -0.07584858}
       - {x: -0.35274935, y: -0.24191862}
       - {x: -0.317397, y: -0.36313045}
       - {x: -0.19962251, y: -0.43038923}
       - {x: 0.012885094, y: -0.52577025}
-      - {x: 0.34767348, y: -0.384206}
-      - {x: 0.38753557, y: -0.16932577}
+      - {x: 0.42709893, y: -0.35657978}
+      - {x: 0.32474858, y: -0.17923951}
       - {x: 0.2066161, y: 0.04716003}
-      - {x: 0.12796438, y: 0.11650944}
-      - {x: 0.0146410465, y: 0.4121536}
+      - {x: 0.13126898, y: 0.08346367}
+      - {x: -0.0018817186, y: 0.11143732}
   m_UseDelaunayMesh: 0
 --- !u!114 &1445285368280598737
 MonoBehaviour:
@@ -117,6 +103,8 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   checkpointIndex: 0
+  spriteOn: {fileID: 21300000, guid: 46ec0142a35655641a8532d2b9effc37, type: 3}
+  spriteOff: {fileID: 21300000, guid: 0d07224eb6ac45d48b214736f048c373, type: 3}
 --- !u!1 &6089368333397161389
 GameObject:
   m_ObjectHideFlags: 0
@@ -143,7 +131,7 @@ Transform:
   m_GameObject: {fileID: 6089368333397161389}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0.152, z: 0}
+  m_LocalPosition: {x: 0, y: -0.015, z: 0}
   m_LocalScale: {x: 0.25, y: 0.25, z: 0.25}
   m_ConstrainProportionsScale: 1
   m_Children: []
@@ -190,7 +178,7 @@ SpriteRenderer:
   m_SortingLayerID: 0
   m_SortingLayer: 0
   m_SortingOrder: 1
-  m_Sprite: {fileID: 21300000, guid: 46ec0142a35655641a8532d2b9effc37, type: 3}
+  m_Sprite: {fileID: 21300000, guid: 0d07224eb6ac45d48b214736f048c373, type: 3}
   m_Color: {r: 1, g: 1, b: 1, a: 1}
   m_FlipX: 0
   m_FlipY: 0

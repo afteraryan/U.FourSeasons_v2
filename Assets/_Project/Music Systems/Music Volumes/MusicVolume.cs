@@ -18,14 +18,12 @@ public class MusicVolume : MonoBehaviour
         if (LevelAudioManager.Instance == null)
             return;
         LevelAudioManager.Instance.PlayBackgroundMusic(audioClip);
-        LevelAudioManager.Instance.FadeIn();
     }
     
     private void OnTriggerExit2D(Collider2D other)
     {
         if (LevelAudioManager.Instance == null)
             return;
-        LevelAudioManager.Instance.StopBackgroundMusic(); 
-        LevelAudioManager.Instance.FadeOut(); 
+        LevelAudioManager.Instance.StopBackgroundMusic();
     }
 }

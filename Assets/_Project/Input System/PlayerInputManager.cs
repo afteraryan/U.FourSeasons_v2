@@ -24,7 +24,6 @@ public class PlayerInputManager : GenericMonoSingleton<PlayerInputManager>
     {
         //_playerInput = new InputSystem();
         _playerInput = new PlayerControls();
-        
     }
 
     private void OnEnable()
@@ -33,7 +32,6 @@ public class PlayerInputManager : GenericMonoSingleton<PlayerInputManager>
         _playerInput.Touch.PrimaryTouch.started += PrimaryTouchStarted;
         _playerInput.Touch.PrimaryTouch.canceled += PrimaryTouchCanceled;
         _playerInput.Touch.Tap.performed += TapPerformed;
-        
     }
 
     private void OnDisable()

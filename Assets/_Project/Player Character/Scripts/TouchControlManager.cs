@@ -16,7 +16,7 @@ public class TouchControlManager : MonoBehaviour
     private Vector2 _touchEndPosition;
 
     private const float TouchSensitivity = 0.6f; // Lower this value to reduce sensitivity
-    private const float MovementThreshold = 3f; // Adjust this threshold as needed
+    private const float MovementThreshold = 8f; // Adjust this threshold as needed
 
     
     private float _previousTouchPosition;
@@ -50,10 +50,13 @@ public class TouchControlManager : MonoBehaviour
     
     private void OnPrimaryTouchStarted(Vector2 touchPosition, float time)
     {
+        if (!_characterController.GetInputEnabled())
+            return;
         _isTouching = true;
         _touchStartTime = time;
         _initialTouchPosition = touchPosition.x;
         _previousTouchPosition = _initialTouchPosition;
+        _characterController.Jump();
 
         // Start the touch movement coroutine
         _touchMovementCoroutine = StartCoroutine(TouchMovementCoroutine());
@@ -61,6 +64,8 @@ public class TouchControlManager : MonoBehaviour
     
     private void OnPrimaryTouchCanceled(Vector2 touchPosition, float time)
     {
+        if (!_characterController.GetInputEnabled())
+            return;
         _isTouching = false;
         _touchEndTime = time;
         _characterController.SetHorizontalInput(0);
@@ -112,6 +117,8 @@ public class TouchControlManager : MonoBehaviour
 
     private void OnTapPerformed()
     {
-        _characterController.Jump();
+        if (!_characterController.GetInputEnabled())
+            return;
+        //_characterController.Jump();
     }
 }

@@ -21,18 +21,14 @@ public class GenericMonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
             {
                 if (_instance == null)
                 {
-                    // Search for existing instance.
                     _instance = (T)FindObjectOfType(typeof(T));
 
-                    // Create new instance if one doesn't already exist.
                     if (_instance == null)
                     {
-                        // Need to create a new GameObject to attach the singleton to.
                         var singletonObject = new GameObject();
                         _instance = singletonObject.AddComponent<T>();
                         singletonObject.name = typeof(T).ToString() + " (Singleton)";
 
-                        // Make instance persistent.
                         DontDestroyOnLoad(singletonObject);
                     }
                 }
@@ -42,13 +38,28 @@ public class GenericMonoSingleton<T> : MonoBehaviour where T : MonoBehaviour
         }
     }
 
+    protected virtual void Awake()
+    {
+        if (_instance == null)
+        {
+            _instance = this as T;
+            DontDestroyOnLoad(this.gameObject);
+        }
+        else if (_instance != this)
+        {
+            Destroy(gameObject);
+        }
+    }
+
     private void OnApplicationQuit()
     {
         _applicationIsQuitting = true;
     }
 
-    private void OnDestroy()
-    {
-        _applicationIsQuitting = true;
-    }
+    // Remove OnDestroy or modify its logic
+    // OnDestroy can be problematic when it comes to singletons, particularly in scene loading/unloading
+    // private void OnDestroy()
+    // {
+    //     _applicationIsQuitting = true;
+    // }
 }

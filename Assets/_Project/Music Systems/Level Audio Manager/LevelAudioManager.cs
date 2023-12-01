@@ -17,12 +17,12 @@ public class LevelAudioManager : GenericMonoSingleton<LevelAudioManager>
     public void PlayBackgroundMusic(AudioClip audioClip)
     {
         backgroundMusicSource.clip = audioClip;
-        backgroundMusicSource.Play();
+        FadeIn();
     }
     
     public void StopBackgroundMusic()
     {
-        backgroundMusicSource.Stop();
+        FadeOut();
     }
     
     public void FadeIn()

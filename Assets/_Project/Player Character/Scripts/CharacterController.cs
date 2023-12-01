@@ -11,20 +11,10 @@ namespace _Project.Player_Character.Script
     public class CharacterController : MonoBehaviour
     {
         
+        #region PHYSICS PARAMETERS
         [Header("PHYSICS PARAMETERS")]
         [SerializeField] private CharacterPhysicsParameters initialPhysicsParameters;
         [SerializeField] private CharacterPhysicsParameters normalPhysicsParameters;
-
-        #region PHYSICS PARAMETERS
-        private float gravity;
-        private float jumpVelocity;
-        private float horizontalSpeed;
-        private float maxJumpHeight;
-        private float jumpImpulseMultiplier = 1f;
-        private float jumpImpulseDuration = 0f;
-        private float fallImpulseMultiplier = 1f;
-        private float fallImpulseDuration = 0f;
-        private float fallForce;
         private CharacterPhysicsParameters _currentPhysicsParameters;
         #endregion
         
@@ -37,6 +27,8 @@ namespace _Project.Player_Character.Script
         private float _flowerBoostHeightMultiplier = 1f;
         private float _currentFallForce = 1;
         private float _jumpHeight;
+        private float _currentFallTerminalVelocity;
+        private bool _isDead = false;
         
         
         [Header("Ground Check Parameters")]
@@ -49,8 +41,8 @@ namespace _Project.Player_Character.Script
         [SerializeField] private float raycastSideOffset = 0.5f;
         
         //JUMP and FALL
-        private bool _isGrounded;
-        private bool _isJumping;
+        private bool _isGrounded = false;
+        private bool _isJumping = false;
         private float _startJumpHeight;
         private bool _isFalling = false;
         private bool _fallStart = false;
@@ -60,24 +52,23 @@ namespace _Project.Player_Character.Script
         private InputSystem _playerInput;
         private Vector2 _moveInput;
         private float _horizontalInput;
+        private bool _isInputEnabled = true;
         
         //ACTIONS
         public static Action OnJump;
         public static Action OnLand;
         public static Action OnFall;
+        public static Action PlayerDied;
         
         //ANIMATIONS
         private AnimationController _animationController;
         private Vector3 _originalScale;
         
-        public static event Action PlayerDied;
 
         #region EVENT FUNCTIONS
         private void Awake()
         {
-            SetPhysicsParameters(initialPhysicsParameters);
             _playerInput = new InputSystem();
-            _currentGravity = gravity;
             _originalScale = transform.localScale;
             
             _animationController = new AnimationController();
@@ -85,6 +76,9 @@ namespace _Project.Player_Character.Script
         }
         private void Start()
         {
+            _currentPhysicsParameters = SaveManager.LoadPhysicsParameters(initialPhysicsParameters);
+            _currentGravity = _currentPhysicsParameters.gravity;
+            _currentFallTerminalVelocity = _currentPhysicsParameters.fallTerminalVelocity;
             _animationController.UpdateMovementState(CharacterMovementState.IDLE);
         }
         private void OnEnable()
@@ -103,7 +97,13 @@ namespace _Project.Player_Character.Script
         }
         private void Update()
         {
-            GroundCheck();
+            if (_isDead)
+                return;
+        }
+        private void FixedUpdate()
+        {
+            if(_isDead)
+                return;
             if (_isGrounded)
             {
                 if (_isJumping)
@@ -118,37 +118,23 @@ namespace _Project.Player_Character.Script
 
                 if (_isFalling)
                 {
-                    _isFalling = false;
-                    _fallStart = false;
-                    _extraHeight = 0;
-                    OnLand?.Invoke();
-                    //_currentGravity = 0;
-                    _currentFallForce = 1;
-                    _animationController.UpdateMovementState(CharacterMovementState.JUMP_LAND);
+                    OnLanding();
                 }
             }
             else
             {
                 // Apply gravity
-                _verticalSpeed -= _currentGravity * Time.deltaTime;
+                _verticalSpeed -= _currentGravity * Time.fixedDeltaTime;
                 if (_verticalSpeed < 0 && !_fallStart)
                 {
                     // If we are moving downwards, consider it as falling
-                    _isJumping = false;
-                    _isFalling = true;
-                    _fallStart = true;
-                    _extraHeight = 0;
-                    _currentGravity = 3 * gravity;
-                    _currentFallForce = fallForce;
-                    OnFall?.Invoke();
-                    _animationController.UpdateMovementState(CharacterMovementState.JUMP_FALL);
+                    OnFallStart();
                 }
             }
-        }
-        private void FixedUpdate()
-        {
+            GroundCheck();
             Move();
             HandleFall();
+            
         }
         #endregion
 
@@ -171,6 +157,9 @@ namespace _Project.Player_Character.Script
         public void Die()
         {
             Debug.Log("Player died");
+            _animationController.PlayDeathAnimation();
+            GetComponentInChildren<Collider2D>().enabled = false;
+            _isDead = true;
 
             // Make character fall
             StartCoroutine(FallAndDieRoutine());
@@ -178,10 +167,10 @@ namespace _Project.Player_Character.Script
         private IEnumerator FallAndDieRoutine()
         {
             // Adjust gravity to make the character fall
-            _currentGravity = -gravity; // Assuming negative gravity will make the character fall
+            //_currentGravity = -_currentPhysicsParameters.gravity; // Assuming negative gravity will make the character fall
 
             // Wait for 2 seconds
-            yield return new WaitForSeconds(0.5f);
+            yield return new WaitForSeconds(1f);
 
             // Trigger the PlayerDied event
             PlayerDied?.Invoke();
@@ -191,24 +180,42 @@ namespace _Project.Player_Character.Script
 
         private void MovementPerformed(InputAction.CallbackContext ctx)
         {
+            if(!_isInputEnabled)
+                return;
             _moveInput = ctx.ReadValue<Vector2>();
             _horizontalInput = _moveInput.x;
         }
         
         private void MovementCanceled(InputAction.CallbackContext ctx)
         {
+            if(!_isInputEnabled)
+                return;
             _moveInput = Vector2.zero;
             _horizontalInput = _moveInput.x;
         }
         
         public void SetHorizontalInput(float horizontalInput)
         {
+            if(!_isInputEnabled)
+                return;
             _horizontalInput = horizontalInput;
         }
         
         private void OnJumpPerformed(InputAction.CallbackContext context)
         {
+            if(!_isInputEnabled)
+                return;
             Jump();
+        }
+        
+        public void SetInputEnabled(bool isInputEnabled)
+        {
+            _isInputEnabled = isInputEnabled;
+        }
+        
+        public bool GetInputEnabled()
+        {
+            return _isInputEnabled;
         }
 
         #endregion
@@ -222,9 +229,9 @@ namespace _Project.Player_Character.Script
             _startJumpHeight = transform.position.y;
             _currentGravity = 0;
             // Calculate the initial vertical speed for the jump
-            _verticalSpeed = Mathf.Sqrt(2 * gravity * maxJumpHeight);
+            _verticalSpeed = Mathf.Sqrt(2 * _currentPhysicsParameters.gravity * _currentPhysicsParameters.maxJumpHeight);
             OnJump?.Invoke();
-            StartCoroutine(VerticalImpulseRoutine(jumpImpulseMultiplier, jumpImpulseDuration)); // Start the easing out coroutine
+            StartCoroutine(VerticalImpulseRoutine(_currentPhysicsParameters.jumpImpulseMultiplier, _currentPhysicsParameters.jumpImpulseDuration)); // Start the easing out coroutine
             _animationController.UpdateMovementState(CharacterMovementState.JUMP_LAUNCH);
         }
 
@@ -233,21 +240,25 @@ namespace _Project.Player_Character.Script
             // VERTICAL MOVEMENT
             // Apply vertical speed (jumping or falling)
             float verticalVelocity =
-                _verticalSpeed * Time.fixedDeltaTime * _verticalImpulseMultiplier*_flowerBoostImpulse*fallForce*_currentFallForce + _boostExtraVelocity;
+                _verticalSpeed * Time.fixedDeltaTime * _verticalImpulseMultiplier*_flowerBoostImpulse*_currentPhysicsParameters.fallForce*_currentFallForce + _boostExtraVelocity;
+            //Fall Terminal Velocity
+            if(_isFalling && verticalVelocity < -1*_currentFallTerminalVelocity)
+                verticalVelocity = -1*_currentFallTerminalVelocity;
+            
             transform.position += new Vector3(0f, verticalVelocity, 0f);
 
-            _jumpHeight = 0.8f * (_startJumpHeight + maxJumpHeight * _flowerBoostHeightMultiplier) + _extraHeight;
+            _jumpHeight = 0.8f * (_startJumpHeight + _currentPhysicsParameters.maxJumpHeight) * _flowerBoostHeightMultiplier + _extraHeight;
 
             if (transform.position.y >= _jumpHeight)
             {
-                _currentGravity = 4 * gravity;
+                _currentGravity = 4 * _currentPhysicsParameters.gravity;
             }
             
 
             if (!_isGrounded)
             {
                 // HORIZONTAL MOVEMENT
-                transform.position += new Vector3(_horizontalInput * Time.fixedDeltaTime * horizontalSpeed * _horizontalImpulseMultiplier, 0f, 0f);
+                transform.position += new Vector3(_horizontalInput * Time.fixedDeltaTime * _currentPhysicsParameters.horizontalSpeed * _horizontalImpulseMultiplier, 0f, 0f);
                 FlipCharacterScale(_horizontalInput);
             }
         }
@@ -255,6 +266,29 @@ namespace _Project.Player_Character.Script
         {
             if (!_isFalling)
                 return;
+        }
+
+        private void OnFallStart()
+        {
+            _isJumping = false;
+            _isFalling = true;
+            _fallStart = true;
+            _extraHeight = 0;
+            _currentGravity = 3 * _currentPhysicsParameters.gravity;
+            _currentFallForce = _currentPhysicsParameters.fallForce;
+            OnFall?.Invoke();
+            _animationController.UpdateMovementState(CharacterMovementState.JUMP_FALL);
+        }
+
+        private void OnLanding()
+        {
+            _isFalling = false;
+            _fallStart = false;
+            _extraHeight = 0;
+            OnLand?.Invoke();
+            //_currentGravity = 0;
+            _currentFallForce = 1;
+            _animationController.UpdateMovementState(CharacterMovementState.JUMP_LAND);
         }
 
         
@@ -370,16 +404,8 @@ namespace _Project.Player_Character.Script
         
         private void SetPhysicsParameters(CharacterPhysicsParameters physicsParameters)
         {
-            gravity = physicsParameters.gravity;
-            jumpVelocity = physicsParameters.jumpVelocity;
-            horizontalSpeed = physicsParameters.horizontalSpeed;
-            maxJumpHeight = physicsParameters.maxJumpHeight;
-            jumpImpulseMultiplier = physicsParameters.jumpImpulseMultiplier;
-            jumpImpulseDuration = physicsParameters.jumpImpulseDuration;
-            fallImpulseMultiplier = physicsParameters.fallImpulseMultiplier;
-            fallImpulseDuration = physicsParameters.fallImpulseDuration;
-            fallForce = physicsParameters.fallForce;
             _currentPhysicsParameters = physicsParameters;
+            SaveManager.SavePhysicsParameters(_currentPhysicsParameters);
         }
 
         #endregion
@@ -398,5 +424,6 @@ public struct CharacterPhysicsParameters
     public float fallImpulseMultiplier;
     public float fallImpulseDuration;
     public float fallForce;
+    public float fallTerminalVelocity;
 }
 

@@ -9,15 +9,11 @@ public class Booster : MonoBehaviour
     
     private void OnTriggerEnter2D(Collider2D other)
     {
-        Debug.Log("Collision with: " + other.name + ", " + other.gameObject.layer);
-        if (other.CompareTag("Player"))
-        {
-            CharacterController characterController = other.GetComponentInParent<CharacterController>();
-            if (characterController.GetIsFalling())
-                return;
-            Debug.Log("Collide");
-            characterController.Boost(extraBoostVelocity, boostHeight, boostDuration);
-            //Destroy(gameObject);
-        }
+        CharacterController characterController = other.GetComponentInParent<CharacterController>();
+        if (characterController.GetIsFalling())
+            return;
+        
+        characterController.Boost(extraBoostVelocity, boostHeight, boostDuration);
+        //Destroy(gameObject);
     }
 }
